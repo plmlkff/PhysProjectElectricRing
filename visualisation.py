@@ -6,6 +6,7 @@ import numpy as np
 from tqdm import tqdm
 import math
 from scipy.spatial import distance
+from enum import Enum
 
 from numba import jit
 
@@ -14,6 +15,11 @@ Y_PROP = 1
 CHARGE_PROP = 2
 ENABLE_PARTICLE_PROP = 3
 
+
+class GraphType(Enum):
+    TENSION = 'Напряженность'
+    POWER_LINES = 'Силовые линии'
+    PHI = 'Фи'
 
 class PyQtGraph(QWidget):
 
@@ -55,7 +61,7 @@ class PyQtGraph(QWidget):
         # Создать комбо-бокс
         self.comboBox = QComboBox()
         self.comboBox.setPlaceholderText("Выберите график")
-        self.comboBox.addItems(['Фи', 'Напряженность', 'Силовые линии'])
+        self.comboBox.addItems([GraphType.PHI.value, GraphType.TENSION.value, GraphType.POWER_LINES.value])
         self.comboBox.activated.connect(self.update)
 
         # Создать область для графика
@@ -77,11 +83,11 @@ class PyQtGraph(QWidget):
 
     def update(self):
         self._update_lables()
-        if self.comboBox.currentText() == 'Фи':
+        if self.comboBox.currentText() == GraphType.PHI.value:
             self._draw_phi()
-        if self.comboBox.currentText() == 'Напряженность':
+        if self.comboBox.currentText() == GraphType.TENSION.value:
             self._draw_e()
-        if self.comboBox.currentText() == "Силовые линии":
+        if self.comboBox.currentText() == GraphType.POWER_LINES.value:
             self._draw_lines()
         # Добавить легенду и показать график
         if self.comboBox.currentText() != '':
@@ -150,7 +156,7 @@ def compute_lines(particles, size):
     # charge is expressed in multiples of base charge
     particles = np.array(particles)
 
-    lines_amount = 10  # lines num
+    lines_amount = 40  # lines num
 
     particle_radius = np.sqrt(15)
 
