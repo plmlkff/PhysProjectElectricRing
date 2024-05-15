@@ -107,10 +107,9 @@ class PyQtGraph(QWidget):
 
     def _draw_lines(self):
         self.figure.clear()
-        particles = [[0, -50, 10 ** (-9), 1], [0, 50, 10 ** (-9), 1]]
-        lines, particle_radius = compute_lines(
-            np.array(particles))
         size = 100  # size of plot
+        particles = [[0, -50, 10 ** (-9), 1], [0, 50, 10 ** (-9), 1]]
+        lines, particle_radius = compute_lines(np.array(particles), size)
         plt.xlim(-(size + 1), (size + 1))
         plt.ylim(-(size + 1), (size + 1))
 
@@ -146,8 +145,7 @@ def invert_charge(particle):
     return particle
 
 
-def compute_lines(particles):
-    size = 100  # size of plot
+def compute_lines(particles, size):
     # [x, y, charge, enable lines for the particle]
     # charge is expressed in multiples of base charge
     particles = np.array(particles)
