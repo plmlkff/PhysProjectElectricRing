@@ -21,6 +21,7 @@ class GraphType(Enum):
     POWER_LINES = 'Силовые линии'
     PHI = 'Фи'
 
+
 class PyQtGraph(QWidget):
 
     def __init__(self):
@@ -33,13 +34,15 @@ class PyQtGraph(QWidget):
         self.layout.setSpacing(15)
 
         # Создать слайдеры
-        self.slider1 = QSlider(Qt.Horizontal)
-        self.slider1.setRange(1, 10)
-        self.slider1.valueChanged.connect(self.update)
+        self.slider_radius = QSlider(Qt.Horizontal)
+        self.slider_radius.setRange(1, 100)
+        self.slider_radius.setValue(50)
+        self.slider_radius.valueChanged.connect(self.update)
 
-        self.slider2 = QSlider(Qt.Horizontal)
-        self.slider2.setRange(1, 10)
-        self.slider2.valueChanged.connect(self.update)
+        self.slider_charge = QSlider(Qt.Horizontal)
+        self.slider_charge.setRange(-100, 100)
+        self.slider_charge.setValue(1)
+        self.slider_charge.valueChanged.connect(self.update)
 
         self.slider3 = QSlider(Qt.Horizontal)
         self.slider3.setRange(0, 100)
@@ -47,11 +50,11 @@ class PyQtGraph(QWidget):
 
         # Создать лейблы
         self.lable1 = QLabel()
-        self.lable1.setText(str(self.slider1.value()))
+        self.lable1.setText(str(self.slider_radius.value()))
         self.lable1.setAlignment(Qt.AlignCenter)
 
         self.lable2 = QLabel()
-        self.lable2.setText(str(self.slider2.value()))
+        self.lable2.setText(str(self.slider_charge.value()))
         self.lable2.setAlignment(Qt.AlignCenter)
 
         self.lable3 = QLabel()
@@ -70,9 +73,9 @@ class PyQtGraph(QWidget):
 
         # Добавить элементы управления в макет
         self.layout.addWidget(self.lable1)
-        self.layout.addWidget(self.slider1)
+        self.layout.addWidget(self.slider_radius)
         self.layout.addWidget(self.lable2)
-        self.layout.addWidget(self.slider2)
+        self.layout.addWidget(self.slider_charge)
         self.layout.addWidget(self.lable3)
         self.layout.addWidget(self.slider3)
         self.layout.addWidget(self.comboBox)
@@ -95,27 +98,28 @@ class PyQtGraph(QWidget):
             self.canvas.draw()
 
     def _update_lables(self):
-        self.lable1.setText(str(self.slider1.value()))
-        self.lable2.setText(str(self.slider2.value()))
+        self.lable1.setText(str(self.slider_radius.value()))
+        self.lable2.setText(str(self.slider_charge.value()))
         self.lable3.setText(str(self.slider3.value()))
 
     def _draw_phi(self):
         self.figure.clear()
         x = np.linspace(-50, 50, 100)
-        y = self.phi(2e-9, self.slider1.value(), x)
+        y = phi(2e-9 * self.slider_charge.value(), self.slider_radius.value(), x)
         plt.plot(x, y, label="Фи")
 
     def _draw_e(self):
         self.figure.clear()
         x = np.linspace(-50, 50, 100)
-        y = self.e(2e-9, self.slider1.value(), x)
+        y = e(2e-9 * self.slider_charge.value(), self.slider_radius.value(), x)
         plt.plot(x, y, label="Напряженность")
 
     def _draw_lines(self):
         self.figure.clear()
         size = 100  # size of plot
-        particles = [[0, -50, 10 ** (-9), 1], [0, 50, 10 ** (-9), 1]]
-        lines, particle_radius = compute_lines(np.array(particles), size)
+        particles = np.array([[0, -self.slider_radius.value(), self.slider_charge.value(), 1],
+                              [0, self.slider_radius.value(), self.slider_charge.value(), 1]])
+        lines, particle_radius = compute_lines(particles, size)
         plt.xlim(-(size + 1), (size + 1))
         plt.ylim(-(size + 1), (size + 1))
 
@@ -131,19 +135,19 @@ class PyQtGraph(QWidget):
                 plt.text(particle[0], particle[1], "-", fontsize=20)
 
 
-        def e(self, q, r, x):
-            y = []
-            for x_i in x:
-                y.append(
-                    q * x_i / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i) * (r * r + x_i * x_i)))
-            return y
+def e(q, r, x):
+    y = []
+    for x_i in x:
+        y.append(
+            q * x_i / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i) * (r * r + x_i * x_i)))
+    return y
 
 
-        def phi(self, q, r, x):
-            y = []
-            for x_i in x:
-                y.append(q / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i)))
-            return y
+def phi(q, r, x):
+    y = []
+    for x_i in x:
+        y.append(q / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i)))
+    return y
 
 
 def invert_charge(particle):
