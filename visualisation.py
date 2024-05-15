@@ -114,28 +114,35 @@ class PyQtGraph(QWidget):
         plt.ylim(-(size + 1), (size + 1))
 
         plt.gca().set_aspect('equal', adjustable='box')
-        # plt.grid(True)
         for i in lines:
             for j in i:
                 plt.plot(j[0], j[1], color="r", linewidth=0.8)
         plt.scatter(particles[:, 0], particles[:, 1], s=particle_radius * 30)
+        for particle in particles:
+            if particle[2] > 0:
+                plt.text(particle[0], particle[1], "+", fontsize=20)
+            else:
+                plt.text(particle[0], particle[1], "-", fontsize=20)
 
-    def e(self, q, r, x):
-        y = []
-        for x_i in x:
-            y.append(q * x_i / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i) * (r * r + x_i * x_i)))
-        return y
 
-    def phi(self, q, r, x):
-        y = []
-        for x_i in x:
-            y.append(q / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i)))
-        return y
+        def e(self, q, r, x):
+            y = []
+            for x_i in x:
+                y.append(
+                    q * x_i / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i) * (r * r + x_i * x_i)))
+            return y
+
+
+        def phi(self, q, r, x):
+            y = []
+            for x_i in x:
+                y.append(q / (4 * math.pi * 8.8541878128e-12 * math.sqrt(r * r + x_i * x_i)))
+            return y
 
 
 def invert_charge(particle):
-        particle[CHARGE_PROP] *= -1
-        return particle
+    particle[CHARGE_PROP] *= -1
+    return particle
 
 
 def compute_lines(particles):
@@ -144,7 +151,7 @@ def compute_lines(particles):
     # charge is expressed in multiples of base charge
     particles = np.array(particles)
 
-    lines_amount = 50  # lines num
+    lines_amount = 10  # lines num
 
     particle_radius = np.sqrt(15)
 
