@@ -107,8 +107,9 @@ class PyQtGraph(QWidget):
 
     def _draw_lines(self):
         self.figure.clear()
-        lines, particle_radius, particles = compute_lines(
-            np.array([[0, -50, 10 ** (-9), 1], [0, 50, 10 ** (-9), 1]]))
+        particles = [[0, -50, 10 ** (-9), 1], [0, 50, 10 ** (-9), 1]]
+        lines, particle_radius = compute_lines(
+            np.array(particles))
         size = 100  # size of plot
         plt.xlim(-(size + 1), (size + 1))
         plt.ylim(-(size + 1), (size + 1))
@@ -187,7 +188,7 @@ def compute_lines(particles):
             particle_lines.append(straight_lines)
 
         all_lines.append(particle_lines)
-    return all_lines, particle_radius, particles
+    return all_lines, particle_radius
 
 
 @jit
