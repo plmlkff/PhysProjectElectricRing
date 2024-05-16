@@ -135,6 +135,8 @@ class PyQtGraph(QWidget):
     def _draw_lines(self):
         self.figure.clear()
         size = 100  # size of plot
+        if self.slider_charge.value() == 0:
+            return
         particles = np.array([[0, -self.slider_radius.value(), self.slider_charge.value(), 1],
                               [0, self.slider_radius.value(), self.slider_charge.value(), 1]])
         lines, particle_radius = compute_lines(particles, size, self.slider_lines_count.value())
