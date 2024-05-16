@@ -33,6 +33,10 @@ class PyQtGraph(QWidget):
         self.setLayout(self.layout)
         self.layout.setSpacing(15)
 
+        # Виджет со слайдерами и лейблами
+        self.slidersVBOX = QVBoxLayout()
+        self.layout.addLayout(self.slidersVBOX)
+
         # Создать слайдеры
         self.slider_radius = QSlider(Qt.Horizontal)
         self.slider_radius.setRange(1, 100)
@@ -44,22 +48,23 @@ class PyQtGraph(QWidget):
         self.slider_charge.setValue(1)
         self.slider_charge.valueChanged.connect(self.update)
 
-        self.slider3 = QSlider(Qt.Horizontal)
-        self.slider3.setRange(0, 100)
-        self.slider3.valueChanged.connect(self.update)
+        self.slider_lines_count = QSlider(Qt.Horizontal)
+        self.slider_lines_count.setRange(1, 70)
+        self.slider_lines_count.setValue(40)
+        self.slider_lines_count.valueChanged.connect(self.update)
 
         # Создать лейблы
-        self.lable1 = QLabel()
-        self.lable1.setText(str(self.slider_radius.value()))
-        self.lable1.setAlignment(Qt.AlignCenter)
+        self.lable_radius = QLabel()
+        self.lable_radius.setText(str(self.slider_radius.value()))
+        self.lable_radius.setAlignment(Qt.AlignCenter)
 
-        self.lable2 = QLabel()
-        self.lable2.setText(str(self.slider_charge.value()))
-        self.lable2.setAlignment(Qt.AlignCenter)
+        self.lable_charge = QLabel()
+        self.lable_charge.setText(str(self.slider_charge.value()))
+        self.lable_charge.setAlignment(Qt.AlignCenter)
 
-        self.lable3 = QLabel()
-        self.lable3.setText(str(self.slider3.value()))
-        self.lable3.setAlignment(Qt.AlignCenter)
+        self.lable_lines_count = QLabel()
+        self.lable_lines_count.setText(str(self.slider_lines_count.value()))
+        self.lable_lines_count.setAlignment(Qt.AlignCenter)
 
         # Создать комбо-бокс
         self.comboBox = QComboBox()
@@ -72,25 +77,38 @@ class PyQtGraph(QWidget):
         self.canvas = FigureCanvas(self.figure)
 
         # Добавить элементы управления в макет
-        self.layout.addWidget(self.lable1)
-        self.layout.addWidget(self.slider_radius)
-        self.layout.addWidget(self.lable2)
-        self.layout.addWidget(self.slider_charge)
-        self.layout.addWidget(self.lable3)
-        self.layout.addWidget(self.slider3)
+        self.slidersVBOX.addWidget(self.lable_radius)
+        self.slidersVBOX.addWidget(self.slider_radius)
+        self.slidersVBOX.addWidget(self.lable_charge)
+        self.slidersVBOX.addWidget(self.slider_charge)
         self.layout.addWidget(self.comboBox)
         self.layout.addWidget(self.canvas)
 
         # Инициализировать график
         self.update()
 
+    def _show_lines_count(self):
+        self.slidersVBOX.addWidget(self.lable_lines_count)
+        self.slidersVBOX.addWidget(self.slider_lines_count)
+        self.lable_lines_count.show()
+        self.slider_lines_count.show()
+
+    def _hide_lines_count(self):
+        self.slidersVBOX.removeWidget(self.lable_lines_count)
+        self.slidersVBOX.removeWidget(self.slider_lines_count)
+        self.lable_lines_count.hide()
+        self.slider_lines_count.hide()
+
     def update(self):
         self._update_lables()
         if self.comboBox.currentText() == GraphType.PHI.value:
+            self._hide_lines_count()
             self._draw_phi()
         if self.comboBox.currentText() == GraphType.TENSION.value:
+            self._hide_lines_count()
             self._draw_e()
         if self.comboBox.currentText() == GraphType.POWER_LINES.value:
+            self._show_lines_count()
             self._draw_lines()
         # Добавить легенду и показать график
         if self.comboBox.currentText() != '':
@@ -98,9 +116,9 @@ class PyQtGraph(QWidget):
             self.canvas.draw()
 
     def _update_lables(self):
-        self.lable1.setText(str(self.slider_radius.value()))
-        self.lable2.setText(str(self.slider_charge.value()))
-        self.lable3.setText(str(self.slider3.value()))
+        self.lable_radius.setText(str(self.slider_radius.value()))
+        self.lable_charge.setText(str(self.slider_charge.value()))
+        self.lable_lines_count.setText(str(self.slider_lines_count.value()))
 
     def _draw_phi(self):
         self.figure.clear()
@@ -119,7 +137,7 @@ class PyQtGraph(QWidget):
         size = 100  # size of plot
         particles = np.array([[0, -self.slider_radius.value(), self.slider_charge.value(), 1],
                               [0, self.slider_radius.value(), self.slider_charge.value(), 1]])
-        lines, particle_radius = compute_lines(particles, size)
+        lines, particle_radius = compute_lines(particles, size, self.slider_lines_count.value())
         plt.xlim(-(size + 1), (size + 1))
         plt.ylim(-(size + 1), (size + 1))
 
@@ -155,12 +173,10 @@ def invert_charge(particle):
     return particle
 
 
-def compute_lines(particles, size):
+def compute_lines(particles, size, lines_amount):
     # [x, y, charge, enable lines for the particle]
     # charge is expressed in multiples of base charge
     particles = np.array(particles)
-
-    lines_amount = 40  # lines num
 
     particle_radius = np.sqrt(15)
 
