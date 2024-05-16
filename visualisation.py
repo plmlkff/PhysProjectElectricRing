@@ -36,6 +36,11 @@ class PyQtGraph(QWidget):
         # Виджет со слайдерами и лейблами
         self.slidersVBOX = QVBoxLayout()
         self.layout.addLayout(self.slidersVBOX)
+        # Виджеты с лейблами
+        self.lablesHBox_radius = QHBoxLayout()
+        self.lablesHBox_charge = QHBoxLayout()
+        self.lablesHBox_lines_count = QHBoxLayout()
+
 
         # Создать слайдеры
         self.slider_radius = QSlider(Qt.Horizontal)
@@ -54,14 +59,23 @@ class PyQtGraph(QWidget):
         self.slider_lines_count.valueChanged.connect(self.update)
 
         # Создать лейблы
+        self.lable_radius_name = QLabel()
+        self.lable_radius_name.setText('Радиус: ')
+        self.lable_radius_name.setAlignment(Qt.AlignCenter)
         self.lable_radius = QLabel()
         self.lable_radius.setText(str(self.slider_radius.value()))
         self.lable_radius.setAlignment(Qt.AlignCenter)
 
+        self.lable_charge_name = QLabel()
+        self.lable_charge_name.setText('Величина заряда:')
+        self.lable_charge_name.setAlignment(Qt.AlignCenter)
         self.lable_charge = QLabel()
         self.lable_charge.setText(str(self.slider_charge.value()))
         self.lable_charge.setAlignment(Qt.AlignCenter)
 
+        self.lable_lines_count_name = QLabel()
+        self.lable_lines_count_name.setText('Количество линий:')
+        self.lable_lines_count_name.setAlignment(Qt.AlignCenter)
         self.lable_lines_count = QLabel()
         self.lable_lines_count.setText(str(self.slider_lines_count.value()))
         self.lable_lines_count.setAlignment(Qt.AlignCenter)
@@ -77,25 +91,34 @@ class PyQtGraph(QWidget):
         self.canvas = FigureCanvas(self.figure)
 
         # Добавить элементы управления в макет
-        self.slidersVBOX.addWidget(self.lable_radius)
+        self.slidersVBOX.addLayout(self.lablesHBox_radius)
+        self.lablesHBox_radius.addWidget(self.lable_radius_name)
+        self.lablesHBox_radius.addWidget(self.lable_radius)
         self.slidersVBOX.addWidget(self.slider_radius)
-        self.slidersVBOX.addWidget(self.lable_charge)
+        self.slidersVBOX.addLayout(self.lablesHBox_charge)
+        self.lablesHBox_charge.addWidget(self.lable_charge_name)
+        self.lablesHBox_charge.addWidget(self.lable_charge)
         self.slidersVBOX.addWidget(self.slider_charge)
         self.layout.addWidget(self.comboBox)
         self.layout.addWidget(self.canvas)
+        self.slidersVBOX.addLayout(self.lablesHBox_lines_count)
 
         # Инициализировать график
         self.update()
 
     def _show_lines_count(self):
-        self.slidersVBOX.addWidget(self.lable_lines_count)
+        self.lablesHBox_lines_count.addWidget(self.lable_lines_count_name)
+        self.lablesHBox_lines_count.addWidget(self.lable_lines_count)
         self.slidersVBOX.addWidget(self.slider_lines_count)
+        self.lable_lines_count_name.show()
         self.lable_lines_count.show()
         self.slider_lines_count.show()
 
     def _hide_lines_count(self):
-        self.slidersVBOX.removeWidget(self.lable_lines_count)
+        self.lablesHBox_lines_count.removeWidget(self.lable_lines_count_name)
+        self.lablesHBox_lines_count.removeWidget(self.lable_lines_count)
         self.slidersVBOX.removeWidget(self.slider_lines_count)
+        self.lable_lines_count_name.hide()
         self.lable_lines_count.hide()
         self.slider_lines_count.hide()
 
